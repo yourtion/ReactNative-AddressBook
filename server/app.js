@@ -7,8 +7,9 @@ const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const async = require('async');
-const routes = require('./routes/routes');
+const router = express.Router();
 const app = express();
+const debug = require('debug')('rnad:app');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -22,22 +23,26 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+const routes = require('./routes/routes');
+
 async.waterfall([
   function(next){
-    routes(app, next);
+    routes(router, next);
   },
   function () {
+    debug('Done');
     // catch 404 and forward to error handler
-    app.use(function(req, res, next) {
+    app.use(router);
+    app.use((req, res, next) => {
       var err = new Error('Not Found');
       err.status = 404;
       next(err);
     });
 
-    if (app.get('env') === 'development') {
+    if (process.env.NODE_ENV === 'development') {
       app.use(function(err, req, res, next) {
-        res.status(err.status || 500);
-        res.render('error_404', {
+        res.json({
+          status: err.status || 500,
           message: err.message,
           error: err
         });
@@ -45,13 +50,12 @@ async.waterfall([
     }
 
     app.use(function(err, req, res, next) {
-      res.status(err.status || 500);
-      res.render('error_404', {
+      res.json({
+        status: err.status || 500,
         message: err.message,
         error: {}
       });
     });
-
   }
 ]);
 

@@ -2,16 +2,17 @@
 
 const debug = require('debug')('rnad:routes:Test');
 
+
 const Test = {
-  init: function(app){
+  init: (router) => {
     debug('Init');
-    app.get('/test/test', this.doTest);
-    app.get('/test/show', this.doShow);
+    router.get('/test/test', Test.doTest);
+    router.get('/test/show', Test.doShow);
   },
 
   doTest: (req, res) => {
     debug('doTest');
-    res.send({
+    res.json({
       status: 1,
       info: '测试服务doTest'
     });
