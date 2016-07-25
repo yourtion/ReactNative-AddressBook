@@ -1,15 +1,14 @@
 'use strict';
 
 const fs = require('fs');
-const path = require('path');
 const util = require('../util');
 const debug = require('debug')('rnad:routes:User');
 
-const USER_PATH = path.resolve(__dirname, '../../database/user.json');
+const USER_PATH = util.getDatabaseFilePath('user');
 
 const User = {
   init: (router) => {
-    router.post('/user/get', User.getUser);
+    router.get('/user', User.getUser);
     router.post('/user/create', User.addUser);
     router.post('/user/login', User.login);
     router.post('/user/login/token', User.loginByToken);
@@ -19,14 +18,10 @@ const User = {
 
   getUser: (req, res, next) => {
     debug('getUser');
-    const key = req.param('key');
+    const key = req.query['key'];
     const partment = req.param('partment');
-    if (key !== util.getKey()) {
-      return res.json({
-        status: 0,
-        data: '使用了没有鉴权的key'
-      });
-    }
+    if (key !== util.getKey()) return next(new Error('使用了没有鉴权的key'));
+
     fs.readFile(USER_PATH ,(err, data) => {
       if (err) return next(err);
       try {
@@ -50,13 +45,13 @@ const User = {
 
   addUser: (req, res, next) => {
     debug('addUser');
-    const username = req.param('username');
-    const password = util.md5(req.param('password'));
-    const tel = req.param('tel');
-    const email = req.param('email');
-    const partment =  req.param('partment');
-    const tag = req.param('tag');
-    const creater = req.param('creater') || '';
+    const username = req.body['username'];
+    const password = util.md5(req.body['password']);
+    const tel = req.body['tel'];
+    const email = req.body['email'];
+    const partment =  req.body['partment'];
+    const tag = req.body['tag'];
+    const creater = req.body['creater'] || '';
 
     if(!username || !password || !tel || !email || !partment || !tag){
       return next(new Error('缺少必要参数'));
@@ -93,9 +88,9 @@ const User = {
 
   login: (req, res, next) => {
     debug('login');
-    const email = req.param('email');
-    const password = util.md5(req.param('password'));
-    const deviceId = req.param('deviceId');
+    const email = req.body['email'];
+    const password = util.md5(req.body['password']);
+    const deviceId = req.body['deviceId'];
     const token = util.guid() + deviceId;
 
     fs.readFile(USER_PATH, (err, data) => {
@@ -126,7 +121,7 @@ const User = {
 
   loginByToken: (req, res, next) => {
     debug('loginByToken');
-    const token = req.param('token');
+    const token = req.body['token'];
 
     fs.readFile(USER_PATH, (err, data) => {
       if (err) return next(err);
@@ -151,9 +146,9 @@ const User = {
   updatePassword: (req, res, next) => {
     debug('updatePassword');
 
-    const token = req.param('token');
-    const oldPassword = util.md5(req.param('oldPassword'));
-    const password = util.md5(req.param('password'));
+    const token = req.body['token'];
+    const oldPassword = util.md5(req.body['oldPassword']);
+    const password = util.md5(req.body['password']);
 
     fs.readFile(USER_PATH, (err, data) => {
       if (err) return next(err);
@@ -181,8 +176,8 @@ const User = {
   deleteUser: (req, res, next) => {
     debug('deleteUser');
 
-    const token = req.param('token');
-    const email = req.param('email');
+    const token = req.body['token'];
+    const email = req.body['email'];
 
     fs.readFile(USER_PATH, (err, data) => {
       if (err) return next(err);
@@ -211,7 +206,7 @@ const User = {
       }
     });
   }
-  
+
 };
 
 module.exports = User;

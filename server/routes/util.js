@@ -1,6 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
+const path = require('path');
 
 module.exports = {
 
@@ -20,6 +21,10 @@ module.exports = {
 
   getKey: () => {
     return 'HSHHSGSGGSTWSYWSYUSUWSHWBS-REACT-NATIVE';
+  },
+
+  getDatabaseFilePath: (name) =>{
+    return path.resolve(__dirname, '../database/'+ name +'.json');
   }
 
 };
