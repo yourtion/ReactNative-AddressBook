@@ -12,7 +12,7 @@ import {
   View
 } from 'react-native';
 
-class LeaningReactNative extends Component {
+class AddressBook extends Component {
   render() {
     return (
       <View style={styles.container}>
@@ -50,4 +50,4 @@ const styles = StyleSheet.create({
   },
 });
 
-AppRegistry.registerComponent('LeaningReactNative', () => LeaningReactNative);
+AppRegistry.registerComponent('AddressBook', () => AddressBook);
