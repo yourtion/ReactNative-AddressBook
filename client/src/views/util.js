@@ -36,7 +36,7 @@ export default class Util {
   };
 
   //post请求
-  static post(url, data, callback) {
+  static post(url, data) {
     const fetchOptions = {
       method: 'POST',
       headers: {
@@ -45,12 +45,7 @@ export default class Util {
       },
       body: JSON.stringify(data)
     };
-
-    fetch(url, fetchOptions)
-      .then((response) => response.text())
-      .then((responseText) => {
-        callback(JSON.parse(responseText));
-      });
-  };
+    return fetch(url, fetchOptions).then(res => res.json());
+  }
 
 }

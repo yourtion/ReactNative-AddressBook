@@ -13,17 +13,17 @@ import {
   StatusBar,
   ScrollView,
   TouchableHighlight,
-  ActivityIndicatorIOS,
-  AlertIOS,
+  ActivityIndicator,
+  Alert,
   AsyncStorage,
 } from 'react-native';
 import Util from './views/util';
 
-var Home = require('./views/home');
-var About = require('./views/about');
-var Manager = require('./views/manager');
-var Message = require('./views/message');
-var Service = require('./views/service');
+const Home = require('./views/home');
+const About = require('./views/about');
+const Manager = require('./views/manager');
+const Message = require('./views/message');
+const Service = require('./views/service');
 
 StatusBar.setBarStyle('light-content');
 
@@ -50,30 +50,31 @@ class AddressBook extends Component {
   }
 
   componentDidMount() {
-    var that = this;
-    AsyncStorage.getItem('token', function(err, token){
-      if(!err && token){
-        var path = Service.host + Service.loginByToken;
-        Util.post(path, {
-          token: token
-        },function(data){
-          if(data.status){
-            that.setState({
-              showLogin: {
-                height:0,
-                width:0,
-                flex:0,
-              },
-              showIndex:{
-                flex:1,
-                opacity:1
-              },
-              isLoadingShow: false
-            });
-          }
-        });
-      }else{
-        that.setState({
+    AsyncStorage.getItem('token')
+      .then((token) => {
+        if(token){
+          const path = Service.host + Service.loginByToken;
+          Util.post(path, {
+            token: token
+          }).then((data) => {
+            if(data.status){
+              this.setState({
+                showLogin: {
+                  height:0,
+                  width:0,
+                  flex:0,
+                },
+                showIndex:{
+                  flex:1,
+                  opacity:1
+                },
+                isLoadingShow: false
+              });
+            }
+          }).catch(alert);
+        }
+      }).catch((err) => {
+        this.setState({
           showIndex: {
             height:0,
             opacity:0
@@ -84,18 +85,16 @@ class AddressBook extends Component {
           },
           isLoadingShow: false
         });
-      }
     });
 
-    var path = Service.host + Service.getMessage;
-    var that = this;
+    const path = Service.host + Service.getMessage;
     Util.post(path, {
       key: Util.key
-    }, function(data){
-      that.setState({
+    }).then((data) => {
+      this.setState({
         data: data
       });
-    });
+    }).catch(alert);
   };
 
   _selectTab(tabName) {
@@ -105,7 +104,7 @@ class AddressBook extends Component {
   };
 
   _addNavigator(component, title) {
-    var data = null;
+    let data = null;
     if(title === '公告'){
       data = this.state.data;
     }
@@ -126,27 +125,24 @@ class AddressBook extends Component {
   };
 
   _getEmail(val){
-    var email = val;
     this.setState({
-      email: email
+      email: val
     });
   };
 
   _getPassword(val) {
-    var password = val;
     this.setState({
-      password: password
+      password: val
     });
   };
 
   _login() {
-    var email = this.state.email;
-    var password = this.state.password;
-    var path = Service.host + Service.login;
-    var that = this;
+    const email = this.state.email;
+    const password = this.state.password;
+    const path = Service.host + Service.login;
 
     //隐藏登录页 & 加载loading
-    that.setState({
+    this.setState({
       showLogin: {
         height:0,
         width:0,
@@ -154,62 +150,51 @@ class AddressBook extends Component {
       },
       isLoadingShow: true
     });
-    AdSupportIOS.getAdvertisingTrackingEnabled(function(){
-      AdSupportIOS.getAdvertisingId(function(deviceId){
-        Util.post(path, {
-          email: email,
-          password: password,
-          deviceId: deviceId,
-        }, function(data){
-          if(data.status){
-            var user = data.data;
-            //加入数据到本地
-            AsyncStorage.multiSet([
-              ['username', user.username],
-              ['token', user.token],
-              ['userid', user.userid],
-              ['email', user.email],
-              ['tel', user.tel],
-              ['partment', user.partment],
-              ['tag', user.tag],
-            ], function(err){
-              if(!err){
-                that.setState({
-                  showLogin: {
-                    height:0,
-                    width:0,
-                    flex:0,
-                  },
-                  showIndex:{
-                    flex:1,
-                    opacity:1
-                  },
-                  isLoadingShow: false
-                });
-              }
-            });
-
-          }else{
-            AlertIOS.alert('登录', '用户名或者密码错误');
-            that.setState({
-              showLogin: {
-                flex:1,
-                opacity:1
-              },
-              showIndex:{
-                height:0,
-                width:0,
-                flex:0,
-              },
-              isLoadingShow: false
-            });
-          }
+    Util.post(path, {
+      email: email,
+      password: password,
+      deviceId: 'xxxx-1',
+    }).then((data) => {
+      if(data.status){
+        const user = data.data;
+        //加入数据到本地
+        AsyncStorage.multiSet([
+          ['username', user.username],
+          ['token', user.token],
+          ['userid', user.userid],
+          ['email', user.email],
+          ['tel', user.tel],
+          ['partment', user.partment],
+          ['tag', user.tag],
+        ]).catch((err) => {
+          this.setState({
+            showLogin: {
+              height:0,
+              width:0,
+              flex:0,
+            },
+            showIndex:{
+              flex:1,
+              opacity:1
+            },
+            isLoadingShow: false
+          });
         });
-      }, function(){
-        AlertIOS.alert('设置','无法获取设备唯一标识');
+      }
+    }).catch((err) => {
+      Alert.alert('登录', '用户名或者密码错误');
+      this.setState({
+        showLogin: {
+          flex:1,
+          opacity:1
+        },
+        showIndex:{
+          height:0,
+          width:0,
+          flex:0,
+        },
+        isLoadingShow: false
       });
-    }, function(){
-      AlertIOS.alert('设置','无法获取设备唯一标识，请关闭设置->隐私->广告->限制广告跟踪');
     });
   };
 
@@ -218,7 +203,7 @@ class AddressBook extends Component {
       <View style={{flex:1}}>
         {this.state.isLoadingShow ?
           <View style={{flex:1, justifyContent:'center', alignItems:'center'}}>
-            <ActivityIndicatorIOS size="small" color="#268DFF"></ActivityIndicatorIOS>
+            <ActivityIndicator size="small" color="#268DFF" />
           </View>:null
         }
         {!this.state.isLoadingShow ?
@@ -265,18 +250,18 @@ class AddressBook extends Component {
         <ScrollView style={[this.state.showLogin]}>
           <View style={styles.container}>
             <View>
-              <Image style={styles.logo} source={require('./images/logo.png')}></Image>
+              <Image style={styles.logo} source={require('./images/logo.png')} />
             </View>
 
             <View style={styles.inputRow}>
-              <Text>邮箱</Text><TextInput style={styles.input} placeholder="请输入邮箱" onChangeText={this._getEmail}/>
+              <Text>邮箱</Text><TextInput style={styles.input} placeholder="请输入邮箱" onChangeText={this._getEmail.bind(this)} />
             </View>
             <View style={styles.inputRow}>
-              <Text>密码</Text><TextInput style={styles.input} placeholder="请输入密码" password={true} onChangeText={this._getPassword}/>
+              <Text>密码</Text><TextInput style={styles.input} placeholder="请输入密码" password={true} onChangeText={this._getPassword.bind(this)} />
             </View>
 
             <View>
-              <TouchableHighlight underlayColor="#fff" style={styles.btn} onPress={this._login}>
+              <TouchableHighlight underlayColor="#fff" style={styles.btn} onPress={this._login.bind(this)}>
                 <Text style={{color:'#fff'}}>登录</Text>
               </TouchableHighlight>
             </View>
