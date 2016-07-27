@@ -17,9 +17,10 @@ const User = {
   },
 
   getUser: (req, res, next) => {
-    debug('getUser');
     const key = req.body['key'];
     const partment = req.body['partment'];
+    debug('getUser key:%s  partment:%s', key, partment);
+
     if (key !== util.getKey()) return next(new Error('使用了没有鉴权的key'));
 
     fs.readFile(USER_PATH ,(err, data) => {
@@ -33,6 +34,7 @@ const User = {
             newObj.push(obj[i]);
           }
         }
+        debug('UserList: %j', newObj);
         return res.json({
           status: 1,
           data: newObj
@@ -44,7 +46,6 @@ const User = {
   },
 
   addUser: (req, res, next) => {
-    debug('addUser');
     const username = req.body['username'];
     const password = util.md5(req.body['password']);
     const tel = req.body['tel'];
@@ -52,6 +53,7 @@ const User = {
     const partment =  req.body['partment'];
     const tag = req.body['tag'];
     const creater = req.body['creater'] || '';
+    debug('addUser');
 
     if(!username || !password || !tel || !email || !partment || !tag){
       return next(new Error('缺少必要参数'));
@@ -120,8 +122,8 @@ const User = {
   },
 
   loginByToken: (req, res, next) => {
-    debug('loginByToken');
     const token = req.body['token'];
+    debug('loginByToken : %s', token);
 
     fs.readFile(USER_PATH, (err, data) => {
       if (err) return next(err);
@@ -144,11 +146,10 @@ const User = {
   },
 
   updatePassword: (req, res, next) => {
-    debug('updatePassword');
-
     const token = req.body['token'];
     const oldPassword = util.md5(req.body['oldPassword']);
     const password = util.md5(req.body['password']);
+    debug('updatePassword : %s', token);
 
     fs.readFile(USER_PATH, (err, data) => {
       if (err) return next(err);
@@ -174,10 +175,9 @@ const User = {
   },
 
   deleteUser: (req, res, next) => {
-    debug('deleteUser');
-
     const token = req.body['token'];
     const email = req.body['email'];
+    debug('deleteUser - token : %s  email: %s ', token, email);
 
     fs.readFile(USER_PATH, (err, data) => {
       if (err) return next(err);

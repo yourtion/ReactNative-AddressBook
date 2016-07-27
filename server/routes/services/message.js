@@ -16,7 +16,7 @@ const Message = {
   //获取公告消息
   getMessage: (req, res, next) => {
     const key = req.body['key'];
-    debug('getMessage -  key:%s', key);
+    debug('getMessage - key:%s', key);
 
     if(key !== util.getKey()) return next(new Error('使用了没有鉴权的key'));
 
@@ -36,9 +36,9 @@ const Message = {
 
   //增加公告消息
   addMessage: (req, res, next) => {
-
-    const token =  req.query['token'];
+    const token =  req.body['token'];
     const message = req.body['message'];
+    debug('addMessage - token: %s  msg: %j', token, message);
 
     if(!token || !message) return next(new Error('token或者message不能为空'));
 
@@ -48,34 +48,29 @@ const Message = {
 
       try{
         const obj = JSON.parse(data);
-        for(const i in obj){
-          if(obj.hasOwnProperty(i) && token === obj[i].token){
+        for(const i in obj) {
+          if (obj.hasOwnProperty(i) && token === obj[i].token) {
             //增加信息
-            fs.readFile(MESSAGE_PATH, (err, data) =>{
-              if(err) return next(err);
-              const msgObj = JSON.parse(data);
+            const msgObj = JSON.parse(fs.readFileSync(MESSAGE_PATH));
+            msgObj.push({
+              messageid: util.guid(),
+              userid: obj[i].userid,
+              username: obj[i].username,
+              time: new Date().getFullYear() + '-'
+              + (parseInt(new Date().getMonth()) + 1) + '-' + new Date().getDate(),
+              message: message
+            });
 
-              msgObj.push({
-                messageid: util.guid(),
-                userid: obj[i].userid,
-                username: obj[i].username,
-                time: new Date().getFullYear() + '-'
-                +  (parseInt(new Date().getMonth()) + 1) + '-' +  new Date().getDate(),
-                message: message
-              });
-
-              fs.writeFileSync(MESSAGE_PATH, JSON.stringify(msgObj));
-              return res.send({
-                status: 1
-              });
+            fs.writeFileSync(MESSAGE_PATH, JSON.stringify(msgObj));
+            return res.json({
+              status: 1
             });
           }
         }
-
-        return next(new Error('token认证失败'));
       }catch(e) {
         return next(e);
       }
+      return next(new Error('token认证失败'));
     });
   }
 
