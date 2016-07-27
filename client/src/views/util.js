@@ -4,7 +4,7 @@ import React from 'react';
 import { PixelRatio } from 'react-native';
 import Dimensions from 'Dimensions';
 
-default export class Util {
+export default class Util {
 
   //单位像素
   static pixel = 1 / PixelRatio.get();
