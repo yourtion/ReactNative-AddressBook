@@ -9,13 +9,13 @@ const MESSAGE_PATH = util.getDatabaseFilePath('message');
 
 const Message = {
   init: (route) => {
-    route.get('/message', Message.getMessage);
-    route.post('/message', Message.addMessage);
+    route.post('/message/get', Message.getMessage);
+    route.post('/message/add', Message.addMessage);
   },
 
   //获取公告消息
   getMessage: (req, res, next) => {
-    const key = req.query['key'];
+    const key = req.body['key'];
     debug('getMessage -  key:%s', key);
 
     if(key !== util.getKey()) return next(new Error('使用了没有鉴权的key'));

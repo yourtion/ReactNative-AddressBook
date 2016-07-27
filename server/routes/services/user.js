@@ -8,7 +8,7 @@ const USER_PATH = util.getDatabaseFilePath('user');
 
 const User = {
   init: (router) => {
-    router.get('/user', User.getUser);
+    router.post('/user/get', User.getUser);
     router.post('/user/create', User.addUser);
     router.post('/user/login', User.login);
     router.post('/user/login/token', User.loginByToken);
@@ -18,8 +18,8 @@ const User = {
 
   getUser: (req, res, next) => {
     debug('getUser');
-    const key = req.query['key'];
-    const partment = req.param('partment');
+    const key = req.body['key'];
+    const partment = req.body['partment'];
     if (key !== util.getKey()) return next(new Error('使用了没有鉴权的key'));
 
     fs.readFile(USER_PATH ,(err, data) => {
