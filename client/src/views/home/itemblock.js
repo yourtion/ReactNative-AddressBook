@@ -43,7 +43,7 @@ var ItemBlock = React.createClass({
     Util.post(path, {
       key: key,
       partment : partment
-    }, function(data){
+    }).then((data) =>{
       nav.push({
         title: this.props.tag,
         component: Address,
@@ -51,7 +51,7 @@ var ItemBlock = React.createClass({
           data: data
         }
       });
-    }.bind(this));
+    }).catch(alert);
 
   }
 });

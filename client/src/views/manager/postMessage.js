@@ -46,23 +46,19 @@ var PostMessage = React.createClass({
   },
 
   _postMessage: function(){
-    var that = this;
-    AsyncStorage.getItem('token', function(err, token){
-      if(err){
-        alert('权限失效，请退出APP，重新登录');
-      }else{
-        Util.post(Service.host + Service.addMessage, {
-          token: token,
-          message: that.state.message
-        }, function(data){
-          if(data.status){
-            alert('添加成功！');
-          }else{
-            alert('添加失败！');
-          }
-        });
-      }
-
+    AsyncStorage.getItem('token').then((token) => {
+      Util.post(Service.host + Service.addMessage, {
+        token: token,
+        message: that.state.message
+      }).then((data) => {
+        if(data.status){
+          alert('添加成功！');
+        }else{
+          alert('添加失败！');
+        }
+      }).catch(alert);
+    }).catch((err) => {
+      alert('权限失效，请退出APP，重新登录');
     });
   }
 

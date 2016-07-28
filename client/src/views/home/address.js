@@ -3,7 +3,6 @@
 import React, { Component } from 'react';
 import Util from '../util';
 var ActionSheetIOS = require('ActionSheetIOS');
-var Service = require('./../service');
 
 import {
   View,

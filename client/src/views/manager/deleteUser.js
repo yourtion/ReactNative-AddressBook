@@ -11,7 +11,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  AlertIOS,
+  Alert,
   AsyncStorage,
   } from 'react-native';
 
@@ -47,30 +47,25 @@ var DeleteUser = React.createClass({
   },
 
   _deleteUser: function(){
-    var that = this;
     this.state.email == '' ?
-      AlertIOS.alert('提示', '请输入要删除的用户邮箱') :
-      AlertIOS.alert('提示', '确认删除该用户？', [
+      Alert.alert('提示', '请输入要删除的用户邮箱') :
+      Alert.alert('提示', '确认删除该用户？', [
         {
           text: '删除',
-          onPress: function(){
+          onPress: () => {
             var path = Service.host + Service.deleteUser;
-            AsyncStorage.getItem('token', function(err, data){
-              if(!err){
-                Util.post(path,{
-                  token: data,
-                  email: that.state.email
-                }, function(data){
-                  if(data.status){
-                    AlertIOS.alert('成功', '删除成功');
-                  }else{
-                    AlertIOS.alert('失败', '删除失败');
-                  }
-                });
-              }else{
-                AlertIOS.alert('提示', '没有权限');
-              }
-            });
+            AsyncStorage.getItem('token').then((data)=> {
+              Util.post(path,{
+                token: data,
+                email: this.state.email
+              }).then((data) => {
+                if(data.status){
+                  Alert.alert('成功', '删除成功');
+                }else{
+                  Alert.alert('失败', '删除失败');
+                }
+              });
+            }).catch(alert);
           }
         },
         {text: '取消', onPress: ()=>null},

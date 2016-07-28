@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   TextInput,
   PickerIOS,
-  AlertIOS,
+  Alert,
   } from 'react-native';
 
 var AddUser = React.createClass({
@@ -275,7 +275,7 @@ var AddUser = React.createClass({
     var tel = this.state.tel;
 
     if(!username || !email || !password || !tel){
-      return AlertIOS.alert('提示', '用户名、初始密码、邮箱电话、必填，请确认!');
+      return Alert.alert('提示', '用户名、初始密码、邮箱电话、必填，请确认!');
     }
     var obj = {
       username: username,
@@ -287,13 +287,13 @@ var AddUser = React.createClass({
     };
 
     var path =  Service.host + Service.createUser;
-    Util.post(path, obj, function(data){
+    Util.post(path, obj).then((data) => {
       if(data.status){
-        AlertIOS.alert('成功','创建用户成功，请告知用户初始密码');
+        Alert.alert('成功','创建用户成功，请告知用户初始密码');
       }else{
-        AlertIOS.alert('失败','创建用户失败');
+        Alert.alert('失败','创建用户失败');
       }
-    });
+    }).catch(alert);
 
   }
 

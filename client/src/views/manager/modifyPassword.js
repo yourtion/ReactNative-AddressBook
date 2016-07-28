@@ -11,7 +11,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  AlertIOS,
+  Alert,
   AsyncStorage,
   } from 'react-native';
 
@@ -54,26 +54,21 @@ var ModifyUser = React.createClass({
 
   _resetPassword: function(){
     var path = Service.host + Service.updatePassword;
-    var that = this;
-    console.log(that.state.password);
+    console.log(this.state.password);
     //需要服务端确认login token
-    AsyncStorage.getItem('token', function(err, data){
-      if(!err){
-        Util.post(path, {
-          password: that.state.password,
-          oldPassword: that.state.oldPassword,
-          token: data,
-        }, function(data){
-          if(data.status){
-            AlertIOS.alert('成功', data.data);
-          }else{
-            AlertIOS.alert('失败', data.data);
-          }
-        });
-      }else{
-        AlertIOS.alert('失败', data.data);
-      }
-    });
+    AsyncStorage.getItem('token').then((data) => {
+      Util.post(path, {
+        password: this.state.password,
+        oldPassword: this.state.oldPassword,
+        token: data,
+      }).then((data) => {
+        if(data.status){
+          Alert.alert('成功', data.data);
+        }else{
+          Alert.alert('失败', data.data);
+        }
+      }).catch(alert);
+    }).catch(alert);
   }
 
 });
